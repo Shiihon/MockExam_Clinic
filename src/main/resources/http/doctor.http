@@ -1,0 +1,47 @@
+### Get all doctors
+GET {{URL}}
+Authorization: Bearer {{jwt_token}}
+
+### Get doctor by id
+GET {{URL}}/50
+Authorization: Bearer {{jwt_token}}
+
+### Get doctor by speciality
+GET {{URL}}/PSYCHIATRY
+Authorization: Bearer {{jwt_token}}
+
+
+### Get doctors by a range of birthdates
+GET {{URL}}/birthdate/range?from=1975-01-01&to=2020-12-31
+Authorization: Bearer {{jwt_token}}
+
+### Create Doctor
+POST {{URL}}
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+  "name" : "testName",
+  "birthdate" : "1975-04-12",
+  "year_of_graduation" : "2024",
+  "clinic_name" : "testClinic",
+  "speciality" :  "SURGERY"
+}
+
+### Update doctor
+PUT {{URL}}/1
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+  "year_of_graduation" : 2024
+}
+
+### Provoke a mistake by wrong id
+GET {{URL}}/50
+Authorization: Bearer {{jwt_token}}
+
+
+
+
+
