@@ -76,6 +76,7 @@ class SecurityControllerTest {
                 .then()
                 .statusCode(201)
                 .body("username", equalTo(userDTO.getUsername()));
+        System.out.println(userDTO);
     }
 
 }
