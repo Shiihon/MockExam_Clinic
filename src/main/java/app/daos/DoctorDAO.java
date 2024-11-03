@@ -78,31 +78,14 @@ public class DoctorDAO implements IDAO<DoctorDTO, Speciality> {
     @Override
     public DoctorDTO create(DoctorDTO doctorDTO) {
         Doctor doctor = doctorDTO.getAsEntity();
+
         try (EntityManager em = emf.createEntityManager()) {
             em.getTransaction().begin();
-
-            List<Appointment> appointmentsEntities = new ArrayList<>();
-            for (Appointment appointment : doctor.getAppointments()) {
-                Appointment foundappointment = em.find(Appointment.class, appointment.getId());
-
-                if (foundappointment != null) {
-                    appointmentsEntities.add(foundappointment);
-                    foundappointment.setDoctor(doctor);
-                } else {
-                    appointment.setDoctor(doctor);
-                    em.persist(appointment);
-                    appointmentsEntities.add(appointment);
-                }
-                appointment.setDoctor(doctor);
-
-            }
-            doctor.setAppointments(appointmentsEntities);
 
             em.persist(doctor);
             em.getTransaction().commit();
 
             return new DoctorDTO(doctor);
-
         } catch (RuntimeException e) {
             throw new RuntimeException("Error creating doctor : " + e.getMessage(), e);
         }

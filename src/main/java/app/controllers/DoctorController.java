@@ -61,7 +61,7 @@ public class DoctorController implements Controller {
     @Override
     public void getBySpeciality(Context ctx) {
         try {
-            String specialityStr = ctx.pathParam("type");
+            String specialityStr = ctx.pathParam("speciality");
             Speciality speciality = Speciality.valueOf(specialityStr.toUpperCase());
 
             Set<DoctorDTO> doctorsByType = dao.getBySpeciality(speciality);

@@ -20,20 +20,31 @@ public class Doctor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
+
     @Column(name = "birthdate")
     private LocalDate birthDate;
+
     @Column(name = "year_of_graduation")
     private Year yearOfGraduation;
+
     @Column(name = "clinic_name")
     private String clinicName;
+
     @Enumerated(EnumType.STRING)
     private Speciality speciality;
-    @OneToMany(mappedBy = "doctor", orphanRemoval = true)
+
+    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "doctors_and_appointments",
+            joinColumns = @JoinColumn(name = "doctor_id")
+    )
     private List<Appointment> appointments;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -57,7 +68,6 @@ public class Doctor {
 
     public void addAppointment(Appointment appointment) {
         appointments.add(appointment);
-        appointment.setDoctor(this);
     }
 
     @PrePersist

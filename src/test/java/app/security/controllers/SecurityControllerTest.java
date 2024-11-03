@@ -1,6 +1,6 @@
 package app.security.controllers;
 
-import app.PopulatorTestUtil;
+import app.PopulatorTest;
 import app.config.AppConfig;
 import app.config.HibernateConfig;
 import app.security.dtos.UserDTO;
@@ -16,17 +16,16 @@ import java.util.List;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 class SecurityControllerTest {
-    private static PopulatorTestUtil populatorTestUtil;
+    private static PopulatorTest populatorTest;
     private static Javalin app;
 
     @BeforeAll
     static void beforeAll() {
         EntityManagerFactory emf = HibernateConfig.getEntityManagerFactoryForTest();
+        populatorTest = new PopulatorTest(emf);
 
-        populatorTestUtil = new PopulatorTestUtil(emf);
         app = AppConfig.startServer(emf);
 
         RestAssured.baseURI = String.format("http://localhost:%d/api", ApiProps.PORT);
@@ -34,16 +33,16 @@ class SecurityControllerTest {
 
     @BeforeEach
     void setUp() {
-        List<Role> roles = populatorTestUtil.createRoles();
+        List<Role> roles = populatorTest.createRoles();
 
-        List<User> users = populatorTestUtil.createUsers(roles);
-        populatorTestUtil.persist(users);
+        List<User> users = populatorTest.createUsers(roles);
+        populatorTest.persist(users);
     }
 
     @AfterEach
     void tearDown() {
-        populatorTestUtil.cleanup(User.class);
-        populatorTestUtil.cleanup(Role.class);
+        populatorTest.cleanup(User.class);
+        populatorTest.cleanup(Role.class);
     }
 
     @AfterAll

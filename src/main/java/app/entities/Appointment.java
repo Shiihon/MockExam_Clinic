@@ -19,12 +19,14 @@ public class Appointment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @Column(name = "client_name")
     private String clientName;
+
     private LocalDate date;
+
     private LocalTime time;
+
     private String comment;
-    @ManyToOne
-    private Doctor doctor;
 }
 
