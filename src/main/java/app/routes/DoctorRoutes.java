@@ -19,7 +19,7 @@ public class DoctorRoutes {
 
     public EndpointGroup getDoctorRoutes() {
         return () -> {
-            get("/", doctorController::getAll, Role.USER, Role.ADMIN);
+            get("/", doctorController::getAll, Role.ANYONE);
             get("/{id}", doctorController::getById, Role.USER, Role.ADMIN);
             get("/specialities/{speciality}", doctorController::getBySpeciality, Role.USER, Role.ADMIN);
             get("/birthdate/range", doctorController::getByBirthdayRange, Role.USER, Role.ADMIN);
