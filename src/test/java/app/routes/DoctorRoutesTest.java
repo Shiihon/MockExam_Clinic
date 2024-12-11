@@ -32,12 +32,13 @@ import static org.hamcrest.Matchers.*;
 
 class DoctorRoutesTest {
     private static UserDTO userDTO, adminDTO;
-    private static String userToken, adminToken;
+    private static User user1, user2, user3, admin;
+    private static String userToken1, userToken2, userToken3, adminToken;
     private static SecurityDAO securityDAO;
     private static SecurityController securityController;
 
     private static Javalin app;
-    private static EntityManagerFactory emf;
+    private static EntityManagerFactory emfTest;
 
     private static DoctorDAO doctorDAO;
     private static PopulatorTest populatorTest;
@@ -51,41 +52,66 @@ class DoctorRoutesTest {
 
     @BeforeAll
     static void init() {
-        emf = HibernateConfig.getEntityManagerFactoryForTest();
-        app = AppConfig.startServer(emf);
-        populatorTest = new PopulatorTest(emf);
-        doctorDAO = new DoctorDAO(emf);
-        securityDAO = new SecurityDAO(emf);
-        securityController = securityController.getInstance(emf);
+        emfTest = HibernateConfig.getEntityManagerFactoryForTest();
+        app = AppConfig.startServer(emfTest);
+        populatorTest = new PopulatorTest(emfTest);
+        doctorDAO = new DoctorDAO(emfTest);
+        securityDAO = new SecurityDAO(emfTest);
+        securityController = securityController.getInstance(emfTest);
     }
 
     @BeforeEach
     void setUp() {
-        List<Appointment> entityListOfAppointments = populatorTest.listOfAppointments();
-        populatorTest.persist(entityListOfAppointments);
 
-        List<Doctor> entityListOfDoctors = populatorTest.create7Doctors(entityListOfAppointments);
+        // Populate users and roles using populateUsers method (ensures at least 3 users)
+        List<User> entityListOfUsers = PopulatorTest.populateUsers(emfTest); // This will create and persist users and roles
+        user1 = entityListOfUsers.get(0);  // Get the first user
+        user2 = entityListOfUsers.get(1); // Get the second user
+        user3 = entityListOfUsers.get(2); // Get the third user
+        admin = entityListOfUsers.get(3);
+
+        // Persist doctors and appointments
+        List<Doctor> entityListOfDoctors = populatorTest.create7Doctors();
         populatorTest.persist(entityListOfDoctors);
 
+        List<Appointment> entityListOfAppointments = populatorTest.listOfAppointments(entityListOfUsers, entityListOfDoctors);
+        populatorTest.persist(entityListOfAppointments);
+
         // Convert entities to DTOs after persisting
-        listOfAppointments = entityListOfAppointments.stream().map(AppointmentDTO::new).toList();
+        UserDTO userDTO1 = new UserDTO(user1.getUsername(), "user1");
+        UserDTO userDTO2 = new UserDTO(user2.getUsername(), "user2");
+        UserDTO userDTO3 = new UserDTO(user3.getUsername(), "user3");
+        UserDTO adminDTO = new UserDTO(admin.getUsername(), "admin");
+
+        List<UserDTO> userDTOs = List.of(userDTO1, userDTO2, userDTO3, adminDTO);
+
         listOfDoctors = entityListOfDoctors.stream().map(DoctorDTO::new).toList();
+        listOfAppointments = entityListOfAppointments.stream().map(AppointmentDTO::new).toList();
 
-        UserDTO[] users = PopulatorTest.populateUsers(emf);
-        userDTO = users[0];
-        adminDTO = users[1];
 
-        try (EntityManager em = emf.createEntityManager()) {
-            User user = em.find(User.class, userDTO.getUsername());
-            System.out.println("user found : " + user);
+        try (EntityManager em = emfTest.createEntityManager()) {
+            // Example of verifying a user from the database
+            User user = em.find(User.class, userDTO1.getUsername());
+            System.out.println("User found: " + user);
         }
 
+        // Iterate over UserDTOs to generate tokens for each user
         try {
-            UserDTO verifiedUser = securityDAO.getVerifiedUser(userDTO.getUsername(), userDTO.getPassword());
-            UserDTO verifiedAdmin = securityDAO.getVerifiedUser(adminDTO.getUsername(), adminDTO.getPassword());
-            userToken = "Bearer " + securityController.createToken(verifiedUser);
-            adminToken = "Bearer " + securityController.createToken(verifiedAdmin);
+            for (UserDTO user : userDTOs) {
+                UserDTO verifiedUser = securityDAO.getVerifiedUser(user.getUsername(), user.getPassword());
+                String token = "Bearer " + securityController.createToken(verifiedUser);
 
+                // Assign token to corresponding variable based on username
+                if (user.getUsername().equals(userDTO1.getUsername())) {
+                    userToken1 = token; // For the first user (userDTO1)
+                } else if (user.getUsername().equals(adminDTO.getUsername())) {
+                    adminToken = token; // For the admin (adminDTO)
+                } else if (user.getUsername().equals(userDTO2.getUsername())) {
+                    userToken2 = token; // For the second user (userDTO2)
+                } else if (user.getUsername().equals(userDTO3.getUsername())) {
+                    userToken3 = token; // For the third user (userDTO3)
+                }
+            }
         } catch (ValidationException e) {
             throw new RuntimeException(e);
         }
@@ -93,11 +119,11 @@ class DoctorRoutesTest {
 
     @AfterEach
     void tearDown() {
+        populatorTest.cleanup(Appointment.class);
+        populatorTest.cleanup(Doctor.class);
+
         populatorTest.cleanup(Role.class);
         populatorTest.cleanup(User.class);
-
-        populatorTest.cleanup(Doctor.class);
-        populatorTest.cleanup(Appointment.class);
     }
 
     @AfterAll
@@ -109,7 +135,7 @@ class DoctorRoutesTest {
     void testGetAll() {
         DoctorDTO[] doctors = given()
                 .when()
-                .header("Authorization", userToken)
+                .header("Authorization", userToken1)
                 .get(BASE_URL + "/doctors")
                 .then()
                 .statusCode(200)

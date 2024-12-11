@@ -18,7 +18,9 @@ public class AppointmentDTO {
     private Long id;
     @JsonProperty(namespace = "client_name")
     private String clientName;
+    @JsonProperty(namespace = "doctor_id")
     private Long doctorId;
+    private String userName;
     private LocalDate date;
     private LocalTime time;
     private String comment;
@@ -26,6 +28,7 @@ public class AppointmentDTO {
     public AppointmentDTO(Appointment appointment) {
         this.id = appointment.getId();
         this.doctorId = appointment.getDoctor().getId();
+        this.userName = appointment.getUser() != null ? appointment.getUser().getUsername() : null;
         this.clientName = appointment.getClientName();
         this.date = appointment.getDate();
         this.time = appointment.getTime();

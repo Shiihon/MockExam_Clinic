@@ -17,46 +17,74 @@ import java.util.Set;
 public class Populator {
     private EntityManagerFactory emf;
 
-    public Populator(EntityManagerFactory emf) {
-        this.emf = emf;
+    public List<Role> createRoles() {
+        return List.of(
+                new Role("user"),
+                new Role("admin")
+        );
     }
 
-    public List<Appointment> listOfAppointments() {
+    public List<User> createUsers(List<Role> roles) {
+        return List.of(
+                new User(
+                        "user1",
+                        "1234",
+                        Set.of(roles.get(0))
+                ),
+                new User(
+                        "user2",
+                        "1234",
+                        Set.of(roles.get(1))
+                )
+        );
+    }
+
+    public List<Appointment> listOfAppointments(List<User> users, List<Doctor> doctors) {
         return List.of(
                 new Appointment(
                         null,
                         "John Smith",
                         LocalDate.of(2023, 11, 24),
                         LocalTime.of(9, 45),
-                        "First visit"
+                        "First visit",
+                        users.get(0),
+                        doctors.get(1)
                 ),
                 new Appointment(
                         null,
                         "Alice Johnson",
                         LocalDate.of(2023, 11, 27),
                         LocalTime.of(10, 30),
-                        "Follow up"
+                        "Follow up",
+                        users.get(0),
+                        doctors.get(2)
                 ),
                 new Appointment(
                         null,
                         "Bob Anderson",
                         LocalDate.of(2023, 12, 12),
                         LocalTime.of(14, 0),
-                        "General check"
+                        "General check",
+                        users.get(0),
+                        doctors.get(3)
                 ),
                 new Appointment(
                         null,
                         "Emily White",
                         LocalDate.of(2023, 12, 15),
                         LocalTime.of(11, 0),
-                        "Consultation"
+                        "Consultation",
+                        users.get(0),
+                        doctors.get(4)
                 ),
                 new Appointment(
                         null,
                         "David Martinez",
                         LocalDate.of(2023, 12, 18),
                         LocalTime.of(15, 30),
-                        "Routine checkup"
+                        "Routine checkup",
+                        users.get(0),
+                        doctors.get(5)
                 )
         );
     }
@@ -125,28 +153,6 @@ public class Populator {
                         "Summit Health Institute",
                         Speciality.FAMILY_MEDICINE,
                         null // No appointments assigned yet
-                )
-        );
-    }
-
-    public List<Role> createRoles() {
-        return List.of(
-                new Role("user"),
-                new Role("admin")
-        );
-    }
-
-    public List<User> createUsers(List<Role> roles) {
-        return List.of(
-                new User(
-                        "user1",
-                        "1234",
-                        Set.of(roles.get(0))
-                ),
-                new User(
-                        "user2",
-                        "1234",
-                        Set.of(roles.get(1))
                 )
         );
     }

@@ -7,6 +7,9 @@ import app.dtos.DoctorDTO;
 import app.entities.Appointment;
 import app.entities.Doctor;
 import app.enums.Speciality;
+import app.security.dtos.UserDTO;
+import app.security.entities.Role;
+import app.security.entities.User;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
@@ -24,8 +27,10 @@ class DoctorDAOTest {
     private static EntityManagerFactory emfTest;
     private static List<DoctorDTO> listOfDoctors;
     private static List<AppointmentDTO> listOfAppointments;
+    private static List<UserDTO> listOfUsers;
     private static DoctorDAO doctorDAO;
     private static PopulatorTest populatorTest;
+    private static User user1, user2, user3, admin;
 
     @BeforeAll
     static void setUpBeforeClass() {
@@ -36,21 +41,31 @@ class DoctorDAOTest {
 
     @BeforeEach
     void setUp() {
-        List<Appointment> entityListOfAppointments = populatorTest.listOfAppointments();
-        List<Doctor> entityListOfDoctors = populatorTest.create7Doctors(entityListOfAppointments);
+        List<User> entityListOfUsers = PopulatorTest.populateUsers(emfTest); // This will create and persist users and roles
+        user1 = entityListOfUsers.get(0);  // Get the first user
+        user2 = entityListOfUsers.get(1); // Get the second user
+        user3 = entityListOfUsers.get(2); // Get the third user
+        admin = entityListOfUsers.get(3);
 
-        populatorTest.persist(entityListOfAppointments);
+        List<Doctor> entityListOfDoctors = populatorTest.create7Doctors();
         populatorTest.persist(entityListOfDoctors);
 
+        List<Appointment> entityListOfAppointments = populatorTest.listOfAppointments(entityListOfUsers, entityListOfDoctors);
+        populatorTest.persist(entityListOfAppointments);
+
         // Convert entities to DTOs after persisting
-        listOfAppointments = entityListOfAppointments.stream().map(AppointmentDTO::new).toList();
+        listOfUsers = entityListOfUsers.stream().map(user -> new UserDTO(user.getUsername(), user.getPassword())).toList();
         listOfDoctors = entityListOfDoctors.stream().map(DoctorDTO::new).toList();
+        listOfAppointments = entityListOfAppointments.stream().map(AppointmentDTO::new).toList();
     }
 
     @AfterEach
     void tearDown() {
-        populatorTest.cleanup(Doctor.class);
         populatorTest.cleanup(Appointment.class);
+        populatorTest.cleanup(Doctor.class);
+
+        populatorTest.cleanup(Role.class);
+        populatorTest.cleanup(User.class);
     }
 
     @Test

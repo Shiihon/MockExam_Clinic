@@ -1,5 +1,6 @@
 package app.security.dtos;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true) // remove this if everything goes to shit!
 public class UserDTO {
     private String username;
     private String password;

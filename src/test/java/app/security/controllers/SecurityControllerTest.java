@@ -29,6 +29,7 @@ class SecurityControllerTest {
     private static Javalin app;
     private static EntityManagerFactory emfTest;
 
+    private static User user, admin;
     private static UserDTO userDTO, adminDTO;
     private static String userToken, adminToken;
     private static SecurityDAO securityDAO;
@@ -39,6 +40,7 @@ class SecurityControllerTest {
         emfTest = HibernateConfig.getEntityManagerFactoryForTest();
         populatorTest = new PopulatorTest(emfTest);
         securityDAO = new SecurityDAO(emfTest);
+        securityController = SecurityController.getInstance(emfTest);
 
         app = AppConfig.startServer(emfTest);
 
@@ -47,9 +49,12 @@ class SecurityControllerTest {
 
     @BeforeEach
     void setUp() {
-        UserDTO[] users = PopulatorTest.populateUsers(emfTest);
-        userDTO = users[0];
-        adminDTO = users[1];
+        List<User> users = PopulatorTest.populateUsers(emfTest);
+        user = users.get(0);
+        admin = users.get(3);
+
+        userDTO = new UserDTO(user.getUsername(), "user1");
+        adminDTO = new UserDTO(admin.getUsername(), "admin");
 
         try (EntityManager em = emfTest.createEntityManager()) {
             User user = em.find(User.class, userDTO.getUsername());
