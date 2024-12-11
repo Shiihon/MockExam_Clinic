@@ -45,7 +45,7 @@ public class DoctorDTO {
         List<Appointment> appointmentEntities;
         if (this.appointmentsDTO != null) {
             appointmentEntities = this.appointmentsDTO.stream()
-                    .map(AppointmentDTO::getAsEntity) // convert each RoomDTO to Room
+                    .map(AppointmentDTO::getAsEntity) // convert each appointmentDTO to appointment
                     .collect(Collectors.toList());
         } else {
             appointmentEntities = new ArrayList<>();
