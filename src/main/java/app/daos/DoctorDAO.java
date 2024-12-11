@@ -1,14 +1,11 @@
 package app.daos;
 
 import app.dtos.DoctorDTO;
-import app.entities.Appointment;
 import app.entities.Doctor;
 import app.enums.Speciality;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
