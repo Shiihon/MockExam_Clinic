@@ -5,8 +5,8 @@ GET {{url}}/auth/test/
 POST {{url}}/auth/register/
 
 {
-    "username": "user",
-    "password": "test123"
+    "username": "Nanna",
+    "password": "123"
 }
 
 > {%
@@ -18,8 +18,8 @@ POST {{url}}/auth/register/
 POST {{url}}/auth/login/
 
 {
-    "username": "user",
-    "password": "test123"
+    "username": "Nanna",
+    "password": "123"
 }
 
 > {%
@@ -43,7 +43,7 @@ Accept: application/json
 Authorization: Bearer {{jwt_token}}
 
 {
-    "role": "superman"
+    "role": "admin"
 }
 Accept: application/json
 Authorization: Bearer {{jwt_token}}

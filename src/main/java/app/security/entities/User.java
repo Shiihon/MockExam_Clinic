@@ -1,5 +1,6 @@
 package app.security.entities;
 
+import app.entities.Appointment;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -36,6 +37,20 @@ public class User implements Serializable, ISecurityUser {
     @JoinTable(name = "user_roles", joinColumns = {@JoinColumn(name = "user_name", referencedColumnName = "username")}, inverseJoinColumns = {@JoinColumn(name = "role_name", referencedColumnName = "name")})
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude // Avoid circular reference in toString
+    private Set<Appointment> appointments = new HashSet<>();
+
+    public void addAppointment(Appointment appointment) {
+        this.appointments.add(appointment);
+        appointment.setUser(this); // Set the back-reference
+    }
+
+    public void removeAppointment(Appointment appointment) {
+        this.appointments.remove(appointment);
+        appointment.setUser(null); // Break the back-reference
+    }
 
     public Set<String> getRolesAsStrings() {
         if (roles.isEmpty()) {

@@ -1,5 +1,6 @@
 package app.entities;
 
+import app.security.entities.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,5 +29,21 @@ public class Appointment {
     private LocalTime time;
 
     private String comment;
+
+    @ManyToOne
+    @JoinColumn(name = "user_username")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "doctor_id", nullable = false)
+    private Doctor doctor;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 }
 

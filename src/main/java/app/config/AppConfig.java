@@ -5,6 +5,7 @@ import app.security.routes.SecurityRoutes;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
+import io.javalin.http.Context;
 import jakarta.persistence.EntityManagerFactory;
 import lombok.NoArgsConstructor;
 import app.controllers.ExceptionController;
@@ -59,6 +60,9 @@ public class AppConfig {
         AccessController accessController = new AccessController(emf);
 
         app.beforeMatched(accessController::accessHandler); // metoden håndtere access.
+        app.before(AppConfig::corsHeaders);
+        app.options("/*", AppConfig::corsHeadersOptions);
+
         app.start(ApiProps.PORT);
         exceptionContext(app);
         return app;
@@ -66,5 +70,20 @@ public class AppConfig {
 
     public static void stopServer() {
         app.stop();
+    }
+
+    private static void corsHeaders(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        ctx.header("Access-Control-Allow-Credentials", "true");
+    }
+
+    private static void corsHeadersOptions(Context ctx) {
+        ctx.header("Access-Control-Allow-Origin", "*");
+        ctx.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+        ctx.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+        ctx.header("Access-Control-Allow-Credentials", "true");
+        ctx.status(204);
     }
 }
