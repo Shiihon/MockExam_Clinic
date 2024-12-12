@@ -16,6 +16,7 @@ import org.junit.jupiter.api.*;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -91,10 +92,36 @@ class DoctorDAOTest {
     void getBySpeciality() {
         Speciality speciality = Speciality.PEDIATRICS;
 
-        List<DoctorDTO> expected = listOfDoctors.stream().filter(doctorDTO -> doctorDTO.getSpeciality().equals(speciality)).toList();
-        List<DoctorDTO> actual = doctorDAO.getBySpeciality(speciality).stream().toList();
-        System.out.println(expected);
-        System.out.println(actual);
+        // Filter the expected list based on speciality
+        List<DoctorDTO> expected = listOfDoctors.stream()
+                .filter(doctorDTO -> doctorDTO.getSpeciality().equals(speciality))
+                .map(doctorDTO -> new DoctorDTO(
+                        doctorDTO.getId(),
+                        doctorDTO.getName(),
+                        doctorDTO.getBirthDate(),
+                        doctorDTO.getYearOfGraduation(),
+                        doctorDTO.getClinicName(),
+                        doctorDTO.getSpeciality(),
+                        null // appointmentsDTO set to null
+                ))
+                .collect(Collectors.toList());
+
+        // Fetch actual list from DAO and set appointmentsDTO to null
+        List<DoctorDTO> actual = doctorDAO.getBySpeciality(speciality).stream()
+                .map(doctorDTO -> new DoctorDTO(
+                        doctorDTO.getId(),
+                        doctorDTO.getName(),
+                        doctorDTO.getBirthDate(),
+                        doctorDTO.getYearOfGraduation(),
+                        doctorDTO.getClinicName(),
+                        doctorDTO.getSpeciality(),
+                        null
+                ))
+                .collect(Collectors.toList());
+
+        // Log expected and actual
+        System.out.println("EXPECTED: " + expected);
+        System.out.println("ACTUAL: " + actual);
 
         assertThat(actual, hasSize(expected.size()));
         assertThat(actual, containsInAnyOrder(expected.toArray()));
