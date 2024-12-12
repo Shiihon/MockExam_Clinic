@@ -3,6 +3,7 @@ package app.daos;
 import app.dtos.AppointmentDTO;
 import app.entities.Appointment;
 import app.entities.Doctor;
+import app.security.dtos.UserDTO;
 import app.security.entities.User;
 import jakarta.persistence.*;
 
@@ -39,7 +40,7 @@ public class AppointmentDAO implements IDAO<AppointmentDTO, Long> {
         }
     }
 
-    public List<AppointmentDTO> getAppointmentsByUser(User user) {
+    public List<AppointmentDTO> getAppointmentsByUser(UserDTO user) {
         try (EntityManager em = emf.createEntityManager()) {
             String query = "SELECT a FROM Appointment a WHERE a.user.username = :userName";
 
