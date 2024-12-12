@@ -1,9 +1,7 @@
 package app.routes;
 
 import app.controllers.AppointmentController;
-import app.controllers.DoctorController;
 import app.daos.AppointmentDAO;
-import app.daos.DoctorDAO;
 import app.security.enums.Role;
 import io.javalin.apibuilder.EndpointGroup;
 import jakarta.persistence.EntityManagerFactory;
