@@ -17,6 +17,7 @@ public class DoctorController implements Controller {
     public DoctorController(DoctorDAO dao) {
         this.dao = dao;
     }
+
     @Override
     public void getAll(Context ctx) {
         try {
