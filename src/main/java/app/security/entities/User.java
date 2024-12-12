@@ -7,6 +7,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +34,21 @@ public class User implements Serializable, ISecurityUser {
     @Basic(optional = false)
     @Column(name = "password")
     private String password;
+
+    @Column(name = "first_name", length = 50)
+    private String firstname;
+
+    @Column(name = "last_name", length = 50)
+    private String lastname;
+
+    @Column(name = "birthdate")
+    private LocalDate birthdate;
+
+    @Column(name = "address", length = 255)
+    private String address;
+
+    @Column(name = "phonenumber", length = 15)
+    private String phonenumber;
 
     @JoinTable(name = "user_roles", joinColumns = {@JoinColumn(name = "user_name", referencedColumnName = "username")}, inverseJoinColumns = {@JoinColumn(name = "role_name", referencedColumnName = "name")})
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
