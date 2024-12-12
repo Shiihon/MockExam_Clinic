@@ -10,7 +10,9 @@ import jakarta.persistence.EntityExistsException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityNotFoundException;
+import org.mindrot.jbcrypt.BCrypt;
 
+import java.time.LocalDate;
 import java.util.stream.Collectors;
 
 
@@ -45,26 +47,42 @@ public class SecurityDAO implements ISecurityDAO {
     }
 
     @Override
-    public User createUser(String username, String password) {
+    public User createUser(String username, String password, String firstname, String lastname, LocalDate birthdate, String address, String phonenumber) {
         try (EntityManager em = getEntityManager()) {
             User userEntity = em.find(User.class, username);
-            if (userEntity != null)
+            if (userEntity != null) {
                 throw new EntityExistsException("User with username: " + username + " already exists");
-            userEntity = new User(username, password);
+            }
+
+            userEntity = new User();
+            userEntity.setUsername(username);
+            userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt())); // Securely hash the password
+            userEntity.setFirstname(firstname);
+            userEntity.setLastname(lastname);
+            userEntity.setBirthdate(birthdate);
+            userEntity.setAddress(address);
+            userEntity.setPhonenumber(phonenumber);
+
             em.getTransaction().begin();
+
             Role userRole = em.find(Role.class, "user");
-            if (userRole == null)
+            if (userRole == null) {
                 userRole = new Role("user");
-            em.persist(userRole);
+                em.persist(userRole);
+            }
+
             userEntity.addRole(userRole);
             em.persist(userEntity);
             em.getTransaction().commit();
+
             return userEntity;
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             throw new ApiException(400, e.getMessage());
         }
     }
+
+
     @Override
     public User addRole(UserDTO userDTO, String newRole) {
         try (EntityManager em = getEntityManager()) {
@@ -72,16 +90,26 @@ public class SecurityDAO implements ISecurityDAO {
             if (user == null)
                 throw new EntityNotFoundException("No user found with username: " + userDTO.getUsername());
             em.getTransaction().begin();
-                Role role = em.find(Role.class, newRole);
-                if (role == null) {
-                    role = new Role(newRole);
-                    em.persist(role);
-                }
-                user.addRole(role);
-                //em.merge(user);
+            Role role = em.find(Role.class, newRole);
+            if (role == null) {
+                role = new Role(newRole);
+                em.persist(role);
+            }
+            user.addRole(role);
+            //em.merge(user);
             em.getTransaction().commit();
             return user;
         }
     }
+       //OLD VERSION OF CREATE USER
+    //            userEntity = new User(username, password);
+//            em.getTransaction().begin();
+//            Role userRole = em.find(Role.class, "user");
+//            if (userRole == null)
+//                userRole = new Role("user");
+//            em.persist(userRole);
+//            userEntity.addRole(userRole);
+//            em.persist(userEntity);
+//            em.getTransaction().commit();
 }
 

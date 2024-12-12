@@ -1,8 +1,10 @@
 package app.security.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -20,7 +22,26 @@ import java.util.Set;
 public class UserDTO {
     private String username;
     private String password;
+    @JsonProperty("first_name")
+    private String firstName;
+    @JsonProperty("last_name")
+    private String lastName;
+    private LocalDate birthdate;
+    private String address;
+    private String phonenumber;
     Set<String> roles = new HashSet<>();
+
+    // Custom constructor to match the test
+    public UserDTO(String username, String password, String firstName, String lastName,
+                   LocalDate birthDate, String address, String phoneNumber) {
+        this.username = username;
+        this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.birthdate = birthDate;
+        this.address = address;
+        this.phonenumber = phoneNumber;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -56,4 +77,5 @@ public class UserDTO {
     public int hashCode() {
         return Objects.hash(username, roles);
     }
+
 }

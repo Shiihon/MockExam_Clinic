@@ -1,6 +1,7 @@
 package app.security.entities;
 
 import app.entities.Appointment;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -47,7 +48,7 @@ public class User implements Serializable, ISecurityUser {
     @Column(name = "address", length = 255)
     private String address;
 
-    @Column(name = "phonenumber", length = 15)
+    @Column(name = "phonenumber", length = 100)
     private String phonenumber;
 
     @JoinTable(name = "user_roles", joinColumns = {@JoinColumn(name = "user_name", referencedColumnName = "username")}, inverseJoinColumns = {@JoinColumn(name = "role_name", referencedColumnName = "name")})

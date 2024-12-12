@@ -1,0 +1,33 @@
+### Get all appointments
+GET {{app}}
+Authorization: Bearer {{jwt_token}}
+
+### Get doctor by id
+GET {{app}}/1
+Authorization: Bearer {{jwt_token}}
+
+### Get appointments by userId
+GET {{app}}//user/jon@cph.dk
+Authorization: Bearer {{jwt_token}}
+
+### Create appointment
+POST {{app}}
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+  "doctor_id": 1,
+  "date": "2025-04-01",
+  "time": "10:10",
+  "comment": "Checking blood"
+}
+
+### Update doctor
+PUT {{app}}/1
+Authorization: Bearer {{jwt_token}}
+Content-Type: application/json
+
+{
+  "year_of_graduation" : 2024
+}
+

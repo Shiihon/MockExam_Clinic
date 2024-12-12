@@ -38,5 +38,4 @@ public class Utils {
         objectMapper.writer(new DefaultPrettyPrinter());
         return objectMapper;
     }
-
 }

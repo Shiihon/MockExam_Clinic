@@ -35,11 +35,7 @@ public class Doctor {
     @Enumerated(EnumType.STRING)
     private Speciality speciality;
 
-    @OneToMany(orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "doctors_and_appointments",
-            joinColumns = @JoinColumn(name = "doctor_id")
-    )
+    @OneToMany(mappedBy = "doctor", fetch = FetchType.LAZY)
     private List<Appointment> appointments;
 
     @Column(name = "created_at")

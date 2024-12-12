@@ -5,7 +5,25 @@ GET {{url}}/auth/test/
 POST {{url}}/auth/register/
 
 {
-    "username": "Nanna",
+    "username": "Jon@cph.dk",
+    "password": "123",
+    "first_name": "Jon",
+    "last_name": "Biversen",
+    "birthdate": "1992-09-09",
+    "address": "Sommerfuglevej 2, 2610 Rødovre",
+    "phonenumber": "20306080"
+}
+
+> {%
+    client.global.set("jwt_token", response.body.token);
+    console.log("JWT Token:", client.global.get("jwt_token"));
+%}
+
+### Login user
+POST {{url}}/auth/login/
+
+{
+    "username": "Jon@cph.dk",
     "password": "123"
 }
 
@@ -14,11 +32,11 @@ POST {{url}}/auth/register/
     console.log("JWT Token:", client.global.get("jwt_token"));
 %}
 
-###
+### LogIn Admin
 POST {{url}}/auth/login/
 
 {
-    "username": "Nanna",
+    "username": "admin",
     "password": "123"
 }
 

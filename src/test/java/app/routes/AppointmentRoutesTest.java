@@ -4,12 +4,10 @@ import app.PopulatorTest;
 import app.config.AppConfig;
 import app.config.HibernateConfig;
 import app.daos.AppointmentDAO;
-import app.daos.DoctorDAO;
 import app.dtos.AppointmentDTO;
 import app.dtos.DoctorDTO;
 import app.entities.Appointment;
 import app.entities.Doctor;
-import app.enums.Speciality;
 import app.security.controllers.SecurityController;
 import app.security.daos.SecurityDAO;
 import app.security.dtos.UserDTO;
@@ -25,7 +23,6 @@ import org.junit.jupiter.api.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.Year;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -166,15 +163,19 @@ class AppointmentRoutesTest {
 
     @Test
     void testCreate() {
-        System.out.println(listOfUsers); // checking which user.
+
+        String userName = listOfUsers.get(0).getUsername();
+        String name = listOfUsers.get(0).getFirstName() + " " + listOfUsers.get(0).getLastName();
+
         AppointmentDTO expected = new AppointmentDTO(
-                null,
-                "TestName",
-                listOfDoctors.get(1).getId(),
-                listOfUsers.get(0).getUsername(),
-                LocalDate.of(2024, 12, 12),
-                LocalTime.of(15, 10),
-                "TestComment"
+                null,  // id
+                user1.getFirstname() + " " + user1.getLastname(),  // clientName
+                listOfDoctors.get(0).getId(),  // doctorId
+                user1.getUsername(),  // userName
+                LocalDate.of(2024, 10, 10),  // date
+                LocalTime.of(10, 30),  // time
+                "testComment",  // comment
+                user1  // user
         );
 
         AppointmentDTO actual = given()
@@ -191,6 +192,8 @@ class AppointmentRoutesTest {
         assertThat(actual.getClientName(), is(expected.getClientName()));
         assertThat(actual.getComment(), is(expected.getComment()));
         assertThat(actual.getDate(), is(expected.getDate()));
+
+        assertThat(actual.getUserName(), is(expected.getUserName()));
     }
 
     @Test

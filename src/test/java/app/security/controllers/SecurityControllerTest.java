@@ -17,6 +17,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -104,7 +105,15 @@ class SecurityControllerTest {
 
 @Test
 void register() {
-    UserDTO userDTO = new UserDTO("User8", "1234");
+    UserDTO userDTO = new UserDTO(
+            "User8",
+            "1234",
+            "testFirstName",
+            "testLastName",
+            LocalDate.of(1992, 9, 9),
+            "testAdress",
+            "testPhoneNumber"
+            );
 
     given()
             .body(userDTO)

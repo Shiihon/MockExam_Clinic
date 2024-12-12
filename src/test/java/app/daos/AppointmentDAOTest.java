@@ -106,20 +106,27 @@ class AppointmentDAOTest {
 
     @Test
     void create() {
+        // Create LocalDate and LocalTime from the integers
+        LocalDate appointmentDate = LocalDate.of(2024, 10, 10);
+        LocalTime appointmentTime = LocalTime.of(10, 30);
+
+        // Create the expected AppointmentDTO object
         AppointmentDTO expected = new AppointmentDTO(
-                null,
-                "TestName",
-                listOfDoctors.get(0).getId(),
-                "user1",
-                LocalDate.of(2024, 12, 12),
-                LocalTime.of(20, 16),
-                "test comment"
+                null,  // ID will be generated later by the database
+                user1.getFirstname() + " " + user1.getLastname(), // Full client name
+                listOfDoctors.get(0).getId(),  // Doctor ID
+                user1.getUsername(),  // Username
+                appointmentDate,  // Date
+                appointmentTime,  // Time
+                "testComment",  // Comment
+                user1  // User object
         );
+
         AppointmentDTO createdApp = appointmentDAO.create(expected);
 
         assertNotNull(createdApp);  // Ensure the doctor was created
         assertNotNull(createdApp.getId());  // Check that the ID is now generated
-        assertEquals("TestName", createdApp.getClientName());
+        assertEquals(user1.getFirstname() + " " + user1.getLastname(), createdApp.getClientName());
     }
 
     @Test

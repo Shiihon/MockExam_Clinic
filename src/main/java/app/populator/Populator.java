@@ -1,4 +1,4 @@
-package app.populator;
+package app;
 
 import app.entities.Appointment;
 import app.entities.Doctor;
@@ -11,32 +11,64 @@ import jakarta.persistence.EntityManagerFactory;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.Year;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class Populator {
     private EntityManagerFactory emf;
 
-    public List<Role> createRoles() {
-        return List.of(
-                new Role("user"),
-                new Role("admin")
-        );
+    public Populator(EntityManagerFactory emf) {
+        this.emf = emf;
     }
 
-    public List<User> createUsers(List<Role> roles) {
-        return List.of(
-                new User(
-                        "user1",
-                        "1234",
-                        Set.of(roles.get(0))
-                ),
-                new User(
-                        "user2",
-                        "1234",
-                        Set.of(roles.get(1))
-                )
-        );
+    public static List<User> populateUsers(EntityManagerFactory emf) {
+        User user1, user2, user3, admin;
+        Role userRole, adminRole;
+
+        // Create roles
+        userRole = new Role("USER");
+        adminRole = new Role("ADMIN");
+
+        // Create users
+        user1 = new User("user1", "user1");
+        user2 = new User("user2", "user2");
+        user3 = new User("user3", "user3");
+        admin = new User("admin", "admin");
+
+        // Add roles to users
+        user1.addRole(userRole);
+        user2.addRole(userRole);
+        user3.addRole(userRole);
+        admin.addRole(adminRole);
+
+        try (var em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+
+            // Persist roles if they don't exist
+            if (em.find(Role.class, "USER") == null) {
+                em.persist(userRole);
+            }
+            if (em.find(Role.class, "ADMIN") == null) {
+                em.persist(adminRole);
+            }
+
+            // Check if users already exist by username, if not, persist them
+            if (em.find(User.class, "user1") == null) {
+                em.persist(user1);
+            }
+            if (em.find(User.class, "user2") == null) {
+                em.persist(user2);
+            }
+            if (em.find(User.class, "user3") == null) {
+                em.persist(user3);
+            }
+            if (em.find(User.class, "admin") == null) {
+                em.persist(admin);
+            }
+            em.getTransaction().commit();
+        }
+
+        return List.of(user1, user2, user3, admin);
     }
 
     public List<Appointment> listOfAppointments(List<User> users, List<Doctor> doctors) {
@@ -56,7 +88,7 @@ public class Populator {
                         LocalDate.of(2023, 11, 27),
                         LocalTime.of(10, 30),
                         "Follow up",
-                        users.get(0),
+                        users.get(1),
                         doctors.get(2)
                 ),
                 new Appointment(
@@ -65,7 +97,7 @@ public class Populator {
                         LocalDate.of(2023, 12, 12),
                         LocalTime.of(14, 0),
                         "General check",
-                        users.get(0),
+                        users.get(2),
                         doctors.get(3)
                 ),
                 new Appointment(
@@ -74,7 +106,7 @@ public class Populator {
                         LocalDate.of(2023, 12, 15),
                         LocalTime.of(11, 0),
                         "Consultation",
-                        users.get(0),
+                        users.get(1),
                         doctors.get(4)
                 ),
                 new Appointment(
@@ -89,71 +121,70 @@ public class Populator {
         );
     }
 
-    public List<Doctor> create7Doctors(List<Appointment> appointments) {
+    public List<Doctor> create7Doctors() {
         return List.of(
-                new Doctor(
-                        null,
-                        "Dr. Alice Smith",
-                        LocalDate.of(1975, 4, 12),
-                        Year.of(2000),
-                        "City Health Clinic",
-                        Speciality.FAMILY_MEDICINE,
-                        List.of(appointments.get(0), appointments.get(1)) // Appointments for Dr. Alice Smith
-                ),
-                new Doctor(
-                        null,
-                        "Dr. Bob Johnson",
-                        LocalDate.of(1980, 8, 5),
-                        Year.of(2005),
-                        "Downtown Medical Center",
-                        Speciality.SURGERY,
-                        List.of(appointments.get(2), appointments.get(3)) // Appointments for Dr. Bob Johnson
-                ),
-                new Doctor(
-                        null,
-                        "Dr. Clara Lee",
-                        LocalDate.of(1983, 7, 22),
-                        Year.of(2008),
-                        "Green Valley Hospital",
-                        Speciality.PEDIATRICS,
-                        List.of(appointments.get(4)) // Appointments for Dr. Clara Lee
-                ),
-                new Doctor(
-                        null,
-                        "Dr. David Park",
-                        LocalDate.of(1978, 11, 15),
-                        Year.of(2003),
-                        "Hillside Medical Practice",
-                        Speciality.PSYCHIATRY,
-                        null // No appointments assigned yet
-                ),
-                new Doctor(
-                        null,
-                        "Dr. Emily White",
-                        LocalDate.of(1982, 9, 30),
-                        Year.of(2007),
-                        "Metro Health Center",
-                        Speciality.PEDIATRICS,
-                        null // No appointments assigned yet
-                ),
-                new Doctor(
-                        null,
-                        "Dr. Fiona Martinez",
-                        LocalDate.of(1985, 2, 17),
-                        Year.of(2010),
-                        "Riverside Wellness Clinic",
-                        Speciality.SURGERY,
-                        null // No appointments assigned yet
-                ),
-                new Doctor(
-                        null,
-                        "Dr. George Kim",
-                        LocalDate.of(1979, 5, 29),
-                        Year.of(2004),
-                        "Summit Health Institute",
-                        Speciality.FAMILY_MEDICINE,
-                        null // No appointments assigned yet
-                )
+                Doctor.builder()
+                        .name("Dr. Alice Smith")
+                        .birthDate(LocalDate.of(1975, 4, 12))
+                        .yearOfGraduation(Year.of(2000))
+                        .clinicName("City Health Clinic")
+                        .speciality(Speciality.FAMILY_MEDICINE)
+                        .appointments(null) // No appointments assigned yet
+                        .build(),
+
+                Doctor.builder()
+                        .name("Dr. Bob Johnson")
+                        .birthDate(LocalDate.of(1980, 8, 5))
+                        .yearOfGraduation(Year.of(2005))
+                        .clinicName("Downtown Medical Center")
+                        .speciality(Speciality.SURGERY)
+                        .appointments(new ArrayList<>()) // Assign appointments later
+                        .build(),
+
+                Doctor.builder()
+                        .name("Dr. Clara Lee")
+                        .birthDate(LocalDate.of(1983, 7, 22))
+                        .yearOfGraduation(Year.of(2008))
+                        .clinicName("Green Valley Hospital")
+                        .speciality(Speciality.PEDIATRICS)
+                        .appointments(new ArrayList<>()) // Assign appointments later
+                        .build(),
+
+                Doctor.builder()
+                        .name("Dr. David Park")
+                        .birthDate(LocalDate.of(1978, 11, 15))
+                        .yearOfGraduation(Year.of(2003))
+                        .clinicName("Hillside Medical Practice")
+                        .speciality(Speciality.PSYCHIATRY)
+                        .appointments(null) // No appointments assigned yet
+                        .build(),
+
+                Doctor.builder()
+                        .name("Dr. Emily White")
+                        .birthDate(LocalDate.of(1982, 9, 30))
+                        .yearOfGraduation(Year.of(2007))
+                        .clinicName("Metro Health Center")
+                        .speciality(Speciality.PEDIATRICS)
+                        .appointments(null) // No appointments assigned yet
+                        .build(),
+
+                Doctor.builder()
+                        .name("Dr. Fiona Martinez")
+                        .birthDate(LocalDate.of(1985, 2, 17))
+                        .yearOfGraduation(Year.of(2010))
+                        .clinicName("Riverside Wellness Clinic")
+                        .speciality(Speciality.SURGERY)
+                        .appointments(null) // No appointments assigned yet
+                        .build(),
+
+                Doctor.builder()
+                        .name("Dr. George Kim")
+                        .birthDate(LocalDate.of(1979, 5, 29))
+                        .yearOfGraduation(Year.of(2004))
+                        .clinicName("Summit Health Institute")
+                        .speciality(Speciality.FAMILY_MEDICINE)
+                        .appointments(null) // No appointments assigned yet
+                        .build()
         );
     }
 

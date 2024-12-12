@@ -162,6 +162,7 @@
             <version>3.0</version> <!-- Use the latest version available -->
             <scope>test</scope>
         </dependency>
+        <!-- Token -->
     </dependencies>
     <build>
         <finalName>app</finalName> <!-- This is the name of the jar file -->
@@ -194,9 +195,11 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.5.1</version>
                 <configuration>
-                    <outputFile>${project.build.directory}/app.jar</outputFile> <!-- Directly specifies app.jar as the output file -->
+                    <outputFile>${project.build.directory}/app.jar
+                    </outputFile> <!-- Directly specifies app.jar as the output file -->
                     <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                        <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <mainClass>app.Main</mainClass>
                         </transformer>
                     </transformers>
@@ -221,7 +224,6 @@
                     </execution>
                 </executions>
             </plugin>
-
         </plugins>
     </build>
 </project>

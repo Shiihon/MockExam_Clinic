@@ -40,6 +40,24 @@ public class AppointmentDAO implements IDAO<AppointmentDTO, Long> {
         }
     }
 
+    public User getUserByUsername(String username) {
+        // Ensure EntityManager is properly opened and closed
+        try (EntityManager em = emf.createEntityManager()) {
+            // Perform the query to fetch the user by username
+            User user = em.createQuery("SELECT u FROM User u WHERE u.username = :username", User.class)
+                    .setParameter("username", username)
+                    .getSingleResult();
+
+            return user;
+        } catch (NoResultException e) {
+            // Handle case where no user is found
+            return null; // Or throw an exception based on your use case
+        } catch (Exception e) {
+            // Log and rethrow or handle unexpected exceptions
+            throw new RuntimeException("Error fetching user by username", e);
+        }
+    }
+
     public List<AppointmentDTO> getAppointmentsByUser(UserDTO user) {
         try (EntityManager em = emf.createEntityManager()) {
             String query = "SELECT a FROM Appointment a WHERE a.user.username = :userName";

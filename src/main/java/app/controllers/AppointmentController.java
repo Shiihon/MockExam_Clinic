@@ -4,6 +4,8 @@ import app.daos.AppointmentDAO;
 import app.dtos.AppointmentDTO;
 import app.exceptions.ApiException;
 import app.security.dtos.UserDTO;
+import app.security.entities.User;
+import app.util.JwtUtils;
 import io.javalin.http.Context;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -47,6 +49,13 @@ public class AppointmentController implements ControllerAppointment {
                 ctx.res().setStatus(404);
                 throw new EntityNotFoundException("Appointment with id " + id + " could not be found");
             }
+            User user = dao.getUserByUsername(appointment.getUserName()); // Modify this DAO method as needed
+            appointment.setUser(user);
+            // Set client name if not already set
+            if (appointment.getClientName() == null) {
+                appointment.setClientName(user.getFirstname() + " " + user.getLastname());
+            }
+
             ctx.res().setStatus(200);
             ctx.json(appointment);
 
@@ -90,16 +99,47 @@ public class AppointmentController implements ControllerAppointment {
     @Override
     public void create(Context ctx) {
         try {
+            // Extract the JWT token from the Authorization header
+            String token = ctx.header("Authorization");
+
+            // If the token is present, remove "Bearer " prefix
+            if (token != null && token.startsWith("Bearer ")) {
+                token = token.substring(7);
+            } else {
+                throw new ApiException(400, "Authorization token is missing or invalid.");
+            }
+
+            // Extract the username from the JWT token
+            String username = JwtUtils.extractUsername(token);
+
+            if (username == null) {
+                throw new ApiException(400, "Invalid token: username could not be extracted.");
+            }
+
+            // Create the appointment object and set extracted username
             AppointmentDTO appointment = ctx.bodyAsClass(AppointmentDTO.class);
+            appointment.setUserName(username);
+
+            // Fetch the user associated with the appointment (assuming it's in the database)
+            User user = dao.getUserByUsername(username); // Modify this DAO method as needed
+            appointment.setUser(user); // Set the full User object
+
+            // Set the client name based on the user details
+            if (appointment.getClientName() == null && user != null) {
+                appointment.setClientNameFromUser(user);
+            }
+
+            // Create the appointment using the DAO
             AppointmentDTO newAppointment = dao.create(appointment);
 
             if (newAppointment != null) {
-                ctx.res().setStatus(201);
-                ctx.json(newAppointment);
+                ctx.res().setStatus(201);  // HTTP Status 201 Created
+                ctx.json(newAppointment);  // Return the created appointment
             } else {
                 ctx.res().setStatus(400);
                 throw new IllegalArgumentException("Appointment could not be created");
             }
+
         } catch (IllegalArgumentException e) {
             throw new ApiException(400, e.getMessage());
 
@@ -150,4 +190,25 @@ public class AppointmentController implements ControllerAppointment {
             throw new ApiException(500, e.getMessage());
         }
     }
+
+    //OLD CREATE METHOD
+//    public void create(Context ctx) {
+//        try {
+//            AppointmentDTO appointment = ctx.bodyAsClass(AppointmentDTO.class);
+//            AppointmentDTO newAppointment = dao.create(appointment);
+//
+//            if (newAppointment != null) {
+//                ctx.res().setStatus(201);
+//                ctx.json(newAppointment);
+//            } else {
+//                ctx.res().setStatus(400);
+//                throw new IllegalArgumentException("Appointment could not be created");
+//            }
+//        } catch (IllegalArgumentException e) {
+//            throw new ApiException(400, e.getMessage());
+//
+//        } catch (Exception e) {
+//            throw new ApiException(500, e.getMessage());
+//        }
+//    }
 }

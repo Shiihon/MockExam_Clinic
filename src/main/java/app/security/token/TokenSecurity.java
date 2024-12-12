@@ -86,11 +86,12 @@ public class TokenSecurity implements ITokenSecurity {
         // https://codecurated.com/blog/introduction-to-jwt-jws-jwe-jwa-jwk/
         try {
             JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
-                    .subject(user.getUsername())
-                    .issuer(ISSUER)
-                    .claim("username", user.getUsername())
-                    .claim("roles", user.getRoles().stream().reduce((s1, s2) -> s1 + "," + s2).get())
-                    .expirationTime(new Date(new Date().getTime() + Integer.parseInt(TOKEN_EXPIRE_TIME)))
+                    .subject(user.getUsername())  // Subject (username)
+                    .issuer(ISSUER)  // Issuer
+                    .claim("username", user.getUsername())  // Add username to claims
+                    .claim("name", user.getFirstName() + " " + user.getLastName())  // Add full name to claims
+                    .claim("roles", user.getRoles().stream().reduce((s1, s2) -> s1 + "," + s2).get())  // Add roles to claims
+                    .expirationTime(new Date(new Date().getTime() + Integer.parseInt(TOKEN_EXPIRE_TIME)))  // Expiration time
                     .build();
             Payload payload = new Payload(claimsSet.toJSONObject());
 
@@ -105,4 +106,19 @@ public class TokenSecurity implements ITokenSecurity {
             throw new TokenCreationException("Could not create token", e);
         }
     }
+
+    // OLD CREATE TOKEN RIGHT AFTER JWTClaimsSet claimsSet = new JWTClaimsSet.Builder()
+//    .subject(user.getUsername())
+//            .issuer(ISSUER)
+//                    .claim("username", user.getUsername())
+//            .claim("roles", user.getRoles().stream().reduce((s1, s2) -> s1 + "," + s2).get())
+//            .expirationTime(new Date(new Date().getTime() + Integer.parseInt(TOKEN_EXPIRE_TIME)))
+//            .build();
+//    Payload payload = new Payload(claimsSet.toJSONObject());
+//
+//    JWSSigner signer = new MACSigner(SECRET_KEY);
+//    JWSHeader jwsHeader = new JWSHeader(JWSAlgorithm.HS256);
+//    JWSObject jwsObject = new JWSObject(jwsHeader, payload);
+//            jwsObject.sign(signer);
+//            return jwsObject.serialize();
 }
