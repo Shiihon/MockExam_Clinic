@@ -1,7 +1,6 @@
 package app.security.entities;
 
 import app.entities.Appointment;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.mindrot.jbcrypt.BCrypt;

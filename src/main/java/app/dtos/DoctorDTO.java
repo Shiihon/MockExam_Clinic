@@ -41,7 +41,7 @@ public class DoctorDTO {
     }
 
     @JsonIgnore
-    public Doctor getAsEntity (){
+    public Doctor getAsEntity() {
         List<Appointment> appointmentEntities;
         if (this.appointmentsDTO != null) {
             appointmentEntities = this.appointmentsDTO.stream()

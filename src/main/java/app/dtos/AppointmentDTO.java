@@ -48,7 +48,8 @@ public class AppointmentDTO {
             this.clientName = user.getFirstname() + " " + user.getLastname();
         }
     }
-//constructor for test
+
+    //constructor for test
     public AppointmentDTO(Long id, String clientName, Long doctorId, String userName,
                           LocalDate date, LocalTime time, String comment, User user) {
         this.id = id;

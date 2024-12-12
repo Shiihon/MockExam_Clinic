@@ -1,7 +1,6 @@
 package app.entities;
 
 import app.security.entities.User;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

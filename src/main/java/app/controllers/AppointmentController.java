@@ -49,7 +49,7 @@ public class AppointmentController implements ControllerAppointment {
                 ctx.res().setStatus(404);
                 throw new EntityNotFoundException("Appointment with id " + id + " could not be found");
             }
-            User user = dao.getUserByUsername(appointment.getUserName()); // Modify this DAO method as needed
+            User user = dao.getUserByUsername(appointment.getUserName());
             appointment.setUser(user);
             // Set client name if not already set
             if (appointment.getClientName() == null) {
@@ -120,8 +120,8 @@ public class AppointmentController implements ControllerAppointment {
             AppointmentDTO appointment = ctx.bodyAsClass(AppointmentDTO.class);
             appointment.setUserName(username);
 
-            // Fetch the user associated with the appointment (assuming it's in the database)
-            User user = dao.getUserByUsername(username); // Modify this DAO method as needed
+            // Fetch the user associated with the appointment
+            User user = dao.getUserByUsername(username);
             appointment.setUser(user); // Set the full User object
 
             // Set the client name based on the user details
@@ -133,8 +133,8 @@ public class AppointmentController implements ControllerAppointment {
             AppointmentDTO newAppointment = dao.create(appointment);
 
             if (newAppointment != null) {
-                ctx.res().setStatus(201);  // HTTP Status 201 Created
-                ctx.json(newAppointment);  // Return the created appointment
+                ctx.res().setStatus(201);
+                ctx.json(newAppointment);
             } else {
                 ctx.res().setStatus(400);
                 throw new IllegalArgumentException("Appointment could not be created");
@@ -190,25 +190,4 @@ public class AppointmentController implements ControllerAppointment {
             throw new ApiException(500, e.getMessage());
         }
     }
-
-    //OLD CREATE METHOD
-//    public void create(Context ctx) {
-//        try {
-//            AppointmentDTO appointment = ctx.bodyAsClass(AppointmentDTO.class);
-//            AppointmentDTO newAppointment = dao.create(appointment);
-//
-//            if (newAppointment != null) {
-//                ctx.res().setStatus(201);
-//                ctx.json(newAppointment);
-//            } else {
-//                ctx.res().setStatus(400);
-//                throw new IllegalArgumentException("Appointment could not be created");
-//            }
-//        } catch (IllegalArgumentException e) {
-//            throw new ApiException(400, e.getMessage());
-//
-//        } catch (Exception e) {
-//            throw new ApiException(500, e.getMessage());
-//        }
-//    }
 }
