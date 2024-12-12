@@ -91,9 +91,9 @@ class AppointmentDAOTest {
     @Test
     void getAppointmentsByUser() {
         List<AppointmentDTO> expected = listOfAppointments.stream()
-                .filter(appointmentDTO -> appointmentDTO.getUserName().equals(user1.getUsername()))
+                .filter(appointmentDTO -> appointmentDTO.getUserName().equals(listOfUsers.get(0).getUsername()))
                 .toList();
-        List<AppointmentDTO> actual = appointmentDAO.getAppointmentsByUser(user1);
+        List<AppointmentDTO> actual = appointmentDAO.getAppointmentsByUser(listOfUsers.get(0));
 
         // Assertions
         assertThat(actual, hasSize(expected.size())); // Ensure the sizes match
