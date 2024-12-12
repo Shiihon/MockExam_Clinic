@@ -6,17 +6,23 @@ import app.dtos.AppointmentDTO;
 import app.dtos.DoctorDTO;
 import app.entities.Appointment;
 import app.entities.Doctor;
+import app.enums.Speciality;
 import app.security.dtos.UserDTO;
 import app.security.entities.Role;
 import app.security.entities.User;
 import jakarta.persistence.EntityManagerFactory;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import jakarta.persistence.EntityNotFoundException;
+import org.junit.jupiter.api.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Year;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AppointmentDAOTest {
@@ -66,14 +72,32 @@ class AppointmentDAOTest {
 
     @Test
     void getAll() {
+        List<AppointmentDTO> expected = listOfAppointments;
+        List<AppointmentDTO> actual = appointmentDAO.getAll().stream().toList();
+        System.out.println(expected);
+        System.out.println(actual);
+
+        assertThat(actual, hasSize(expected.size()));
     }
 
     @Test
     void getById() {
+        AppointmentDTO expected = listOfAppointments.get(0);
+        AppointmentDTO actual = appointmentDAO.getById(expected.getId());
+
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void getAppointmentsByUser() {
+        List<AppointmentDTO> expected = listOfAppointments.stream()
+                .filter(appointmentDTO -> appointmentDTO.getUserName().equals(user1.getUsername()))
+                .toList();
+        List<AppointmentDTO> actual = appointmentDAO.getAppointmentsByUser(user1);
+
+        // Assertions
+        assertThat(actual, hasSize(expected.size())); // Ensure the sizes match
+        assertThat(actual, containsInAnyOrder(expected.toArray())); // Ensure the contents match
     }
 
     @Test
@@ -82,13 +106,38 @@ class AppointmentDAOTest {
 
     @Test
     void create() {
+        AppointmentDTO expected = new AppointmentDTO(
+                null,
+                "TestName",
+                listOfDoctors.get(0).getId(),
+                "user1",
+                LocalDate.of(2024, 12, 12),
+                LocalTime.of(20, 16),
+                "test comment"
+        );
+        AppointmentDTO createdApp = appointmentDAO.create(expected);
+
+        assertNotNull(createdApp);  // Ensure the doctor was created
+        assertNotNull(createdApp.getId());  // Check that the ID is now generated
+        assertEquals("TestName", createdApp.getClientName());
     }
 
     @Test
     void update() {
+        AppointmentDTO expected = listOfAppointments.get(1);
+        expected.setClientName("TestName2");
+
+        AppointmentDTO actual = appointmentDAO.update(expected.getId(), expected);
+
+        Assertions.assertEquals(expected, actual);
     }
 
     @Test
     void delete() {
+        Long appointmentId = listOfAppointments.get(2).getId();
+
+        appointmentDAO.delete(appointmentId);
+
+       assertThrows(EntityNotFoundException.class, () -> appointmentDAO.getById(appointmentId));
     }
 }
