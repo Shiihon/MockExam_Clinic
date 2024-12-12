@@ -3,11 +3,13 @@ package app.routes;
 import app.PopulatorTest;
 import app.config.AppConfig;
 import app.config.HibernateConfig;
+import app.daos.AppointmentDAO;
 import app.daos.DoctorDAO;
 import app.dtos.AppointmentDTO;
 import app.dtos.DoctorDTO;
 import app.entities.Appointment;
 import app.entities.Doctor;
+import app.enums.Speciality;
 import app.security.controllers.SecurityController;
 import app.security.daos.SecurityDAO;
 import app.security.dtos.UserDTO;
@@ -15,10 +17,15 @@ import app.security.entities.Role;
 import app.security.entities.User;
 import app.security.exceptions.ValidationException;
 import io.javalin.Javalin;
+import io.restassured.http.ContentType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Year;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -37,7 +44,7 @@ class AppointmentRoutesTest {
     private static Javalin app;
     private static EntityManagerFactory emfTest;
 
-    private static DoctorDAO doctorDAO;
+    private static AppointmentDAO appointmentDAO;
     private static PopulatorTest populatorTest;
 
     private static List<AppointmentDTO> listOfAppointments;
@@ -52,7 +59,7 @@ class AppointmentRoutesTest {
         emfTest = HibernateConfig.getEntityManagerFactoryForTest();
         app = AppConfig.startServer(emfTest);
         populatorTest = new PopulatorTest(emfTest);
-        doctorDAO = new DoctorDAO(emfTest);
+        appointmentDAO = new AppointmentDAO(emfTest);
         securityDAO = new SecurityDAO(emfTest);
         securityController = securityController.getInstance(emfTest);
     }
@@ -79,7 +86,7 @@ class AppointmentRoutesTest {
         UserDTO userDTO3 = new UserDTO(user3.getUsername(), "user3");
         UserDTO adminDTO = new UserDTO(admin.getUsername(), "admin");
 
-        List<UserDTO> userDTOs = List.of(userDTO1, userDTO2, userDTO3, adminDTO);
+        listOfUsers = List.of(userDTO1, userDTO2, userDTO3, adminDTO);
 
         listOfDoctors = entityListOfDoctors.stream().map(DoctorDTO::new).toList();
         listOfAppointments = entityListOfAppointments.stream().map(AppointmentDTO::new).toList();
@@ -93,7 +100,7 @@ class AppointmentRoutesTest {
 
         // Iterate over UserDTOs to generate tokens for each user
         try {
-            for (UserDTO user : userDTOs) {
+            for (UserDTO user : listOfUsers) {
                 UserDTO verifiedUser = securityDAO.getVerifiedUser(user.getUsername(), user.getPassword());
                 String token = "Bearer " + securityController.createToken(verifiedUser);
 
@@ -142,7 +149,7 @@ class AppointmentRoutesTest {
     }
 
     @Test
-    void testGetAppointmentById() {
+    void testGetByUserId() {
         AppointmentDTO expected = listOfAppointments.get(0);
 
         AppointmentDTO actual = given()
@@ -155,5 +162,67 @@ class AppointmentRoutesTest {
                 .as(AppointmentDTO.class);
 
         assertThat(expected, is(actual));
+    }
+
+    @Test
+    void testCreate() {
+        System.out.println(listOfUsers); // checking which user.
+        AppointmentDTO expected = new AppointmentDTO(
+                null,
+                "TestName",
+                listOfDoctors.get(1).getId(),
+                listOfUsers.get(0).getUsername(),
+                LocalDate.of(2024, 12, 12),
+                LocalTime.of(15, 10),
+                "TestComment"
+        );
+
+        AppointmentDTO actual = given()
+                .header("Authorization", userToken1)
+                .contentType(ContentType.JSON)
+                .body(expected)
+                .when()
+                .post(BASE_URL + "/appointments/")
+                .then()
+                .statusCode(201)
+                .extract()
+                .as(AppointmentDTO.class);
+
+        assertThat(actual.getClientName(), is(expected.getClientName()));
+        assertThat(actual.getComment(), is(expected.getComment()));
+        assertThat(actual.getDate(), is(expected.getDate()));
+    }
+
+    @Test
+    void testUpdate() {
+        AppointmentDTO expected = listOfAppointments.get(1);
+        expected.setClientName("newTestName");
+
+        appointmentDAO.update(expected.getId(), expected);
+
+        AppointmentDTO actual = given()
+                .when()
+                .header("Authorization", adminToken)
+                .contentType(ContentType.JSON)
+                .body(expected)
+                .put(BASE_URL + "/appointments/{id}", expected.getId())
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(AppointmentDTO.class);
+
+        assertThat(actual.getClientName(), is(expected.getClientName()));
+    }
+
+    @Test
+    void testDelete() {
+        given()
+                .when()
+                .header("Authorization", adminToken)
+                .delete(BASE_URL + "/appointments/{id}", listOfAppointments.get(0).getId())
+                .then()
+                .statusCode(204);
+
+        assertThrows(EntityNotFoundException.class, () -> appointmentDAO.getById(listOfAppointments.get(0).getId()));
     }
 }
